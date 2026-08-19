@@ -27,6 +27,16 @@ Source brief: [`weather_forecast.md`](./weather_forecast.md).
 | Tests        | Vitest + React Testing Library                                                                  |
 | Deploy       | Vercel (planned)                                                                                |
 
+## Getting started
+
+```bash
+npm install
+cp .env.example .env.local   # then paste your OpenWeatherMap API key
+npm run dev
+```
+
+Get a free API key at [openweathermap.org](https://home.openweathermap.org/api_keys) (activation can take a couple of hours). Other scripts: `npm test`, `npm run lint`, `npm run format`.
+
 ## Status
 
 Documentation and decisions first. Scaffolding and implementation follow on `main`.
