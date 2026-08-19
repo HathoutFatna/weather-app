@@ -1,31 +1,10 @@
 # Weather Forecast App
 
-Technical exercise: a small weather app that shows **current conditions** and a **5-day forecast** for a city the user searches.
+A small weather app: search a city, get the **current conditions** and a **5-day forecast**, toggle °C/°F, and jump back to recent searches.
 
-## Problem
-
-Given a city name, the app should:
-
-1. Fetch and display current weather for that city
-2. Show a simple five-day forecast
-3. Handle invalid input and API failures gracefully
-4. Stay modular and readable
-
-**Bonus goals** (we're aiming for these): unit tests, a polished web UI, and a Celsius / Fahrenheit toggle.
+![App screenshot](./docs/screenshot.png)
 
 Source brief: [`weather_forecast.md`](./weather_forecast.md).
-
-## Planned approach
-
-| Area         | Choice                                                                                          |
-| ------------ | ----------------------------------------------------------------------------------------------- |
-| UI           | React 19 + TypeScript + Vite                                                                    |
-| Components   | Custom UI, Tailwind + lucide-react                                                              |
-| Weather API  | OpenWeatherMap free: geocoding → current + 5-day/3-hour forecast (group slots into 5 day cards) |
-| Server state | RTK Query                                                                                       |
-| Client state | Redux Toolkit — unit preference + recent searches only                                          |
-| Tests        | Vitest + React Testing Library                                                                  |
-| Deploy       | Vercel (planned)                                                                                |
 
 ## Getting started
 
@@ -35,8 +14,42 @@ cp .env.example .env.local   # then paste your OpenWeatherMap API key
 npm run dev
 ```
 
-Get a free API key at [openweathermap.org](https://home.openweathermap.org/api_keys) (activation can take a couple of hours). Other scripts: `npm test`, `npm run lint`, `npm run format`.
+Get a free API key at [openweathermap.org](https://home.openweathermap.org/api_keys) (activation can take a couple of hours). Other scripts: `npm test`, `npm run lint`, `npm run format`, `npm run build`.
 
-## Status
+## How it works
 
-Documentation and decisions first. Scaffolding and implementation follow on `main`.
+```
+SearchBar ──▶ WeatherView ──▶ RTK Query (weatherApi) ──▶ OpenWeatherMap
+                    │              │                      (geocode → current + forecast)
+                    │              └─▶ mappers ─▶ domain models
+                    ▼                             (5-day aggregation, °C/°F)
+              empty / loading / error / success
+                    ▲
+   Redux store ─────┘  (unit preference + recent searches, persisted to localStorage)
+```
+
+- **Server state** (weather data) lives in RTK Query, cached as fresh for 30 minutes and retained for 1 hour. Re-searching the same city in that window does not hit the API.
+- **Client state** (unit preference, recent searches) lives in two Redux Toolkit slices, persisted to `localStorage`. The API cache is not persisted.
+- The free API returns the forecast in 3-hour slots; grouping them into five daily summaries (min/max, dominant condition, city-local days) is our own pure, unit-tested code.
+- Temperatures are fetched once in metric and converted client-side on toggle — no refetch.
+
+```
+src/
+  app/                  Redux store, typed hooks
+  features/
+    weather/            RTK Query API, DTOs, domain (mappers, aggregation), UI
+    preferences/        unit slice + °C/°F toggle
+    search-history/     history slice + recent-search chips
+  components/           error boundary + tiny shared primitives
+  test/                 Vitest setup
+```
+
+Each decision (API endpoints, RTK Query cache, why Redux for so little, custom UI) has a short note in [`docs/decisions.md`](./docs/decisions.md).
+
+## Testing
+
+Vitest + React Testing Library. One unit test covers grouping the 3-hour forecast into daily min/max; one integration test covers the °C/°F toggle against a real Redux store. `npm test` runs both; CI runs lint + tests on every push.
+
+## Credits
+
+UI adapted from a community Figma design ([Weather App UI Design](https://www.figma.com/community/file/1100826294536456295)); desktop layout loosely inspired by [Web App UI Design](https://www.figma.com/community/file/1116248614926294639). Icons by [lucide](https://lucide.dev/).
