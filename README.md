@@ -2,6 +2,8 @@
 
 A small weather app: search a city, get the **current conditions** and a **5-day forecast**, toggle °C/°F, and jump back to recent searches.
 
+**Live demo:** [weather-app-trea.vercel.app](https://weather-app-trea.vercel.app/)
+
 ![App screenshot](./docs/screenshot.png)
 
 Source brief: [`weather_forecast.md`](./weather_forecast.md).
