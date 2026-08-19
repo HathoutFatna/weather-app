@@ -1,6 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { aggregateForecast } from "../domain/aggregateForecast";
-import { mapCurrentWeather } from "../domain/mapCurrentWeather";
+import {
+  formatCityLabel,
+  mapCurrentWeather,
+} from "../domain/mapCurrentWeather";
 import type { CurrentWeather, DailyForecast, Place } from "../domain/models";
 import type { CurrentWeatherDto, ForecastResponseDto } from "./dto";
 
@@ -14,6 +17,16 @@ export interface WeatherData {
   place: Place;
 }
 
+function dedupeByLabel(places: Place[]): Place[] {
+  const seen = new Set<string>();
+  return places.filter((place) => {
+    const label = formatCityLabel(place);
+    if (seen.has(label)) return false;
+    seen.add(label);
+    return true;
+  });
+}
+
 export const weatherApi = createApi({
   reducerPath: "weatherApi",
   baseQuery: fetchBaseQuery({
@@ -23,6 +36,13 @@ export const weatherApi = createApi({
   keepUnusedDataFor: 60 * 60,
   refetchOnMountOrArgChange: 30 * 60,
   endpoints: (build) => ({
+    searchCities: build.query<Place[], string>({
+      query: (q) => ({
+        url: "/geo/1.0/direct",
+        params: { q, limit: 5, appid },
+      }),
+      transformResponse: (places: Place[]) => dedupeByLabel(places),
+    }),
     getWeather: build.query<WeatherData, WeatherQueryArg>({
       async queryFn(arg, _api, _extra, baseQuery) {
         let place: Place;
@@ -69,4 +89,4 @@ export const weatherApi = createApi({
   }),
 });
 
-export const { useGetWeatherQuery } = weatherApi;
+export const { useSearchCitiesQuery, useGetWeatherQuery } = weatherApi;

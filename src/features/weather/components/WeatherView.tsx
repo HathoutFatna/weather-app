@@ -50,7 +50,7 @@ export function WeatherView() {
 
   return (
     <main className="flex flex-1 flex-col gap-6">
-      <SearchBar onSearch={(city) => setArg({ city })} />
+      <SearchBar onSearch={(city) => setArg({ city })} onSelectPlace={setArg} />
       <RecentSearches onSelect={setArg} />
 
       <p role="status" aria-live="polite" className="sr-only">
