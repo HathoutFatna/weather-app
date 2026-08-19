@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+
+.env
+.env.local
+
+interview-prep.md
+
+# Vite
+*.local
+.vite/
