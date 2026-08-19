@@ -1,4 +1,6 @@
 import { Droplets, Thermometer, Wind } from "lucide-react";
+import { useAppSelector } from "@/app/hooks";
+import { selectUnit } from "@/features/preferences/preferencesSlice";
 import { displayTemperature } from "../domain/temperature";
 import type { CurrentWeather, DailyForecast } from "../domain/models";
 import { WeatherIcon } from "./WeatherIcon";
@@ -13,6 +15,7 @@ export function CurrentWeatherCard({
   current,
   today,
 }: CurrentWeatherCardProps) {
+  const unit = useAppSelector(selectUnit);
   return (
     <section
       aria-label={`Current weather in ${current.city}`}
@@ -34,12 +37,12 @@ export function CurrentWeatherCard({
 
       <div>
         <p className="text-8xl font-extralight tracking-tighter">
-          {displayTemperature(current.temperatureC, "celsius")}°
+          {displayTemperature(current.temperatureC, unit)}°
         </p>
         {today && (
           <p className="mt-1 text-secondary-foreground">
-            H: {displayTemperature(today.maxTempC, "celsius")}° L:{" "}
-            {displayTemperature(today.minTempC, "celsius")}°
+            H: {displayTemperature(today.maxTempC, unit)}° L:{" "}
+            {displayTemperature(today.minTempC, unit)}°
           </p>
         )}
       </div>
@@ -48,7 +51,7 @@ export function CurrentWeatherCard({
         <Detail
           icon={Thermometer}
           label="Feels like"
-          value={`${displayTemperature(current.feelsLikeC, "celsius")}°`}
+          value={`${displayTemperature(current.feelsLikeC, unit)}°`}
         />
         <Detail
           icon={Droplets}

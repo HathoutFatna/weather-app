@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { skipToken } from "@reduxjs/toolkit/query";
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { SerializedError } from "@reduxjs/toolkit";
 import { CloudOff } from "lucide-react";
+import { useAppDispatch } from "@/app/hooks";
 import {
   useGetWeatherQuery,
   type WeatherQueryArg,
@@ -12,6 +13,8 @@ import { CurrentWeatherCard } from "@/features/weather/components/CurrentWeather
 import { ForecastList } from "@/features/weather/components/ForecastList";
 import { EmptyState } from "@/features/weather/components/EmptyState";
 import { WeatherSkeleton } from "@/features/weather/components/WeatherSkeleton";
+import { RecentSearches } from "@/features/search-history/components/RecentSearches";
+import { placeSearched } from "@/features/search-history/searchHistorySlice";
 
 function weatherErrorMessage(
   error: FetchBaseQueryError | SerializedError | undefined,
@@ -31,6 +34,11 @@ export function WeatherView() {
   const [arg, setArg] = useState<WeatherQueryArg | typeof skipToken>(skipToken);
   const { data, isUninitialized, isLoading, isError, error, refetch } =
     useGetWeatherQuery(arg);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    if (data) dispatch(placeSearched(data.place));
+  }, [data, dispatch]);
 
   const liveMessage = isLoading
     ? "Loading weather…"
@@ -43,6 +51,7 @@ export function WeatherView() {
   return (
     <main className="flex flex-1 flex-col gap-6">
       <SearchBar onSearch={(city) => setArg({ city })} />
+      <RecentSearches onSelect={setArg} />
 
       <p role="status" aria-live="polite" className="sr-only">
         {liveMessage}

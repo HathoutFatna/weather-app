@@ -1,4 +1,6 @@
 import { memo } from "react";
+import { useAppSelector } from "@/app/hooks";
+import { selectUnit } from "@/features/preferences/preferencesSlice";
 import { displayTemperature } from "../domain/temperature";
 import type { DailyForecast } from "../domain/models";
 import { WeatherIcon } from "./WeatherIcon";
@@ -15,6 +17,7 @@ export const ForecastList = memo(function ForecastList({
 }: {
   days: DailyForecast[];
 }) {
+  const unit = useAppSelector(selectUnit);
   return (
     <section aria-label="5-day forecast" className="flex flex-col gap-3">
       <h2 className="text-sm font-medium tracking-widest text-muted-foreground uppercase">
@@ -33,10 +36,10 @@ export const ForecastList = memo(function ForecastList({
               className="size-7 text-accent"
             />
             <span className="text-right">
-              {displayTemperature(day.maxTempC, "celsius")}°
+              {displayTemperature(day.maxTempC, unit)}°
               <span className="text-muted-foreground">
                 {" "}
-                / {displayTemperature(day.minTempC, "celsius")}°
+                / {displayTemperature(day.minTempC, unit)}°
               </span>
             </span>
           </li>
